@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(ServerPi main.cpp
-    ServerPi.h ServerPi.cpp)
+    Server/ServerPi.h Server/ServerPi.cpp
+    Protocols//EngineSensors.h Protocols/EngineSensors.cpp)
 
 include(GNUInstallDirs)
 install(TARGETS ServerPi

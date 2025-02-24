@@ -3,6 +3,8 @@
 
 #include <boost/asio.hpp>
 
+#include "../Protocols/EngineSensors.h"
+
 using boost::asio::ip::tcp;
 
 class ServerPi : public std::enable_shared_from_this<ServerPi>
@@ -15,8 +17,9 @@ public:
     void start_sending();
     void send_message();
 
-private:
+    void sendTestMessages();
 
+private:
     int port_g = 8000;
     boost::asio::io_service io_service;
 
@@ -24,6 +27,8 @@ private:
     tcp::socket socket_;
     boost::asio::steady_timer timer_{acceptor_.get_executor()};
     std::string output_message_;
+
+    EngineSensors engineSensors;
 };
 
 #endif // SERVERPI_H

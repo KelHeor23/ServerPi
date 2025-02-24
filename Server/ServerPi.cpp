@@ -38,15 +38,12 @@ void ServerPi::start_accept()
 void ServerPi::start_sending()
 {
     auto self(shared_from_this());
-    output_message_ = "Hello from server\n"; // Сообщение для отправки
-
-    send_message();
+    sendTestMessages();
 
     // Запускаем таймер для отправки сообщений каждые 0.5 секунды
     timer_.expires_after(std::chrono::milliseconds(500));
     timer_.async_wait([this, self](const boost::system::error_code& ec) {
         if (!ec) {
-            send_message();
             start_sending(); // Продолжаем отправку сообщений
         }
     });
@@ -63,4 +60,12 @@ void ServerPi::send_message()
                                      socket_.close(); // Закрываем сокет при ошибке
                                  }
                              });
+}
+
+void ServerPi::sendTestMessages()
+{
+    for (int i = 0; i < 8; i++) {
+        output_message_ = engineSensors.generateMsg(i);
+        send_message();
+    }
 }
