@@ -54,7 +54,7 @@ void ServerPi::send_message()
     auto self(shared_from_this());
     boost::asio::async_write(socket_,
                              boost::asio::buffer(output_message_),
-                             [this, self](const boost::system::error_code& ec, std::size_t /*length*/) {
+                             [this, self](const boost::system::error_code& ec, std::size_t) {
                                  if (ec) {
                                      std::cerr << "Send error: " << ec.message() << std::endl;
                                      socket_.close(); // Закрываем сокет при ошибке
