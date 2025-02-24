@@ -14,34 +14,6 @@ void ServerPi::run()
     io_service.run(); // Запуск io_service для обработки асинхронных операций
 }
 
-void ServerPi::exchange()
-{
-    /*auto buf = std::make_shared<boost::asio::streambuf>();
-    auto self(shared_from_this()); // Удерживаем объект в памяти
-
-    boost::asio::async_read_until(socket, *buf, '\n',
-                                  [this, self, buf](const boost::system::error_code& ec, std::size_t) {
-                                      if (!ec) {
-                                          std::istream input_stream(buf.get());
-                                          std::getline(input_stream, inputMSG);
-
-                                          // Обработка принятого сообщения
-                                          std::cout << "Received: " << inputMSG << std::endl;
-
-                                          // Отправка сообщения
-                                          boost::asio::async_write(socket,
-                                                                   boost::asio::buffer(outputMSG + "\n"),
-                                                                   [this, self](const boost::system::error_code& ec, std::size_t) {
-                                                                       if (ec) {
-                                                                           std::cerr << "Write error: " << ec.message() << std::endl;
-                                                                       }
-                                                                   });
-                                      } else {
-                                          std::cerr << "Read error: " << ec.message() << std::endl;
-                                      }
-                                  });*/
-}
-
 void ServerPi::start_accept()
 {
     acceptor_.async_accept(socket_,
@@ -51,8 +23,15 @@ void ServerPi::start_accept()
                                    start_sending(); // Начинаем отправку сообщений
                                } else {
                                    std::cerr << "Accept error: " << error.message() << std::endl;
+                                   // Если ошибка, пробуем переподключиться через некоторое время
+                                   boost::asio::steady_timer timer(io_service);
+                                   timer.expires_after(std::chrono::seconds(1)); // Ждем 1 секунду
+                                   timer.async_wait([this](const boost::system::error_code& ec) {
+                                       if (!ec) {
+                                           start_accept(); // Повторяем попытку подключения
+                                       }
+                                   });
                                }
-                               start_accept(); // Ожидать следующее соединение
                            });
 }
 
@@ -82,7 +61,6 @@ void ServerPi::send_message()
                                  if (ec) {
                                      std::cerr << "Send error: " << ec.message() << std::endl;
                                      socket_.close(); // Закрываем сокет при ошибке
-                                     return;
                                  }
                              });
 }

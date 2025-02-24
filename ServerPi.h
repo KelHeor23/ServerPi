@@ -11,7 +11,6 @@ public:
     ServerPi(boost::asio::io_service& io_service, unsigned short port);
 
     void run();
-    void exchange();
     void start_accept();
     void start_sending();
     void send_message();
