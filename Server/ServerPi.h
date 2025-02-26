@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 
 #include "../Protocols/EngineSensors.h"
+#include "../Protocols/VoltageRegulators.h"
 
 using boost::asio::ip::tcp;
 
@@ -29,6 +30,7 @@ private:
     std::string output_message_;
 
     EngineSensors engineSensors;
+    VoltageRegulators voltageRegulators;
 };
 
 #endif // SERVERPI_H
