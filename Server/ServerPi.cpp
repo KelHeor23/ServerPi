@@ -64,16 +64,16 @@ void ServerPi::send_message()
 
 void ServerPi::sendTestMessages()
 {
-    //for (int i = 0; i < 8; i++) {
-        output_message_ = engineSensors.generateMsg(7);
+    for (int i = 0; i < 8; i++) {
+        output_message_ = engineSensors.generateMsg(i);
         std::cout << output_message_ << std::endl;
         send_message();
         usleep(1000);
-    /*}
+    }
 
     for (int i = 0; i < 8; i++) {
         output_message_ = voltageRegulators.generateMsg(i);
         send_message();
         usleep(1000);
-    }*/
+    }
 }
