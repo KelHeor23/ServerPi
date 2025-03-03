@@ -21,6 +21,8 @@ void ServerPi::start_accept()
                                if (!error) {
                                    std::cout << "Client connected!" << std::endl;
                                    start_sending(); // Начинаем отправку сообщений
+                                   // После завершения работы с клиентом, снова начинаем ожидать подключений
+                                   start_accept();
                                } else {
                                    std::cerr << "Accept error: " << error.message() << std::endl;
                                    // Если ошибка, пробуем переподключиться через некоторое время
@@ -47,6 +49,8 @@ void ServerPi::start_sending()
             start_sending(); // Продолжаем отправку сообщений
         }
     });
+
+    start_accept();
 }
 
 void ServerPi::send_message()
