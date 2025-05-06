@@ -7,7 +7,9 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <linux/can/raw.h>
+#include <thread>
 
+namespace Can {
 Reader::Reader() {
     try {
         initSocket();
@@ -19,6 +21,15 @@ Reader::Reader() {
 
 Reader::~Reader(){
     close(canSocket);
+}
+
+void Reader::run()
+{
+    std::thread read([=, this](){
+        runCanHandler();
+    });
+
+    read.detach();
 }
 
 int Reader::initSocket()
@@ -48,7 +59,7 @@ int Reader::initSocket()
     return 0;
 }
 
-void Reader::readCanMsg()
+void Reader::runCanHandler()
 {
     try {
         while (true) {
@@ -80,4 +91,5 @@ void Reader::readCanMsg()
     catch (...) {
         throw std::string{"Чтение can было прервано"};
     }
+}
 }
