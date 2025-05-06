@@ -14,7 +14,7 @@ public:
     void run();
 private:
     int initSocket();
-    void readCanMsg();
+    void runCanHandler();
 
 private:
     int canSocket = 0;
