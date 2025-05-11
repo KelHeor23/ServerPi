@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <bitset>
 
+namespace Can {
 struct CanFrameHeader
 {
     uint8_t priority;   // 5 bits
@@ -21,5 +22,6 @@ struct CanFrameHeader
         return f;
     }
 };
+}
 
 #endif // COMMON_H
