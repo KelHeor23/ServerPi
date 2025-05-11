@@ -6,8 +6,7 @@
 int main()
 {
     try {
-        Can::Reader canReader;
-        canReader.run();
+        Can::Reader::Instance().run();
 
         boost::asio::io_service io_service;
         auto server = std::make_shared<ServerPi>(io_service, 8001);

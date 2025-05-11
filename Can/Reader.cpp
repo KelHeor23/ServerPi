@@ -10,6 +10,7 @@
 #include <thread>
 
 namespace Can {
+
 Reader::Reader() {
     try {
         initSocket();
@@ -17,6 +18,11 @@ Reader::Reader() {
         throw msg;
         return;
     }
+}
+
+std::queue<can_frame> Reader::getMessages() const
+{
+    return messages;
 }
 
 Reader::~Reader(){
@@ -75,6 +81,8 @@ void Reader::runCanHandler()
                 continue;
             }
 
+            messages.push(frame);
+            /*
             // Вывод информации о сообщении
             std::cout << "ID: " << std::hex << std::setw(3) << std::setfill('0')
                       << (frame.can_id & 0x1FFFFFFF) << "  Длина: " << std::dec
@@ -85,7 +93,7 @@ void Reader::runCanHandler()
                 std::cout << std::hex << std::setw(2) << std::setfill('0')
                           << static_cast<int>(frame.data[i]) << " ";
             }
-            std::cout << std::endl;
+            std::cout << std::endl;*/
         }
     }
     catch (...) {
