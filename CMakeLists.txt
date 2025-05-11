@@ -10,7 +10,8 @@ add_executable(ServerPi main.cpp
     Protocols//EngineSensors.h Protocols/EngineSensors.cpp
     Protocols/VoltageRegulators.h Protocols/VoltageRegulators.cpp
     Protocols/Constants.h
-    Can/Reader.h Can/Reader.cpp)
+    Can/Reader.h Can/Reader.cpp
+    Can/Common.h)
 
 include(GNUInstallDirs)
 install(TARGETS ServerPi
