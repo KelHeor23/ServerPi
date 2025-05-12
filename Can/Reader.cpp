@@ -9,6 +9,8 @@
 #include <linux/can/raw.h>
 #include <thread>
 
+#include "Common.h"
+
 namespace Can {
 
 Reader::Reader() {
@@ -87,6 +89,13 @@ void Reader::runCanHandler()
             }
 
             messages.push(frame);
+
+            CanFrameHeader temp = CanFrameHeader::unpack(frame.can_id);
+
+            std::cout << "priority: " << temp.priority << std::endl;
+            std::cout << "dataID: " << temp.dataID << std::endl;
+            std::cout << "frameType: " << temp.frameType << std::endl;
+            std::cout << "nodeID: " << temp.nodeID << std::endl;
             /*
             // Вывод информации о сообщении
             std::cout << "ID: " << std::hex << std::setw(3) << std::setfill('0')
