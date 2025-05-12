@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iostream>
 #include <cstring>
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -73,8 +74,9 @@ int Reader::initSocket()
 }
 
 void Reader::runCanHandler()
-{
+{    
     try {
+        sendMsg();
         while (true) {
             // Чтение CAN-сообщения
             ssize_t nbytes = read(canSocket, &frame, sizeof(frame));
@@ -93,6 +95,33 @@ void Reader::runCanHandler()
     }
     catch (...) {
         throw std::string{"Чтение can было прервано"};
+    }
+}
+
+void Reader::sendMsg()
+{
+    CanRequestMsg request;
+    memset(&request, 0, sizeof(request));
+
+    request.opcode = 0x00;                   // Пример кода операции
+    request.status_msg_id = htons(0x4E36);    // Пример ID сообщения
+    request.upload_period_ms = htons(1000);    // Пример периода в мс
+
+    // Создание CAN-фрейма
+    struct can_frame frame;
+    memset(&frame, 0, sizeof(frame));
+
+    // Настройка фрейма (пример 11-битного идентификатора)
+    frame.can_id = 0x00E8A081;                     // CAN ID сообщения
+    frame.can_dlc = 8;                        // Всегда 8 байт для CAN
+
+    // Копирование данных во фрейм
+    memcpy(frame.data, &request, sizeof(request));
+
+    // Отправка данных
+    int bytes_sent = write(canSocket, &frame, sizeof(frame));
+    if (bytes_sent == -1) {
+        throw std::runtime_error("Ошибка отправки CAN-сообщения");
     }
 }
 }

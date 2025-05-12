@@ -6,6 +6,16 @@
 #include <bitset>
 
 namespace Can {
+
+#pragma pack(push, 1) // Выравнивание по 1 байту
+struct CanRequestMsg{
+    uint8_t opcode;
+    uint16_t status_msg_id;
+    uint16_t upload_period_ms;
+    uint8_t reserved[3];
+};
+#pragma pack(pop)
+
 struct CanFrameHeader
 {
     uint8_t priority;   // 5 bits
