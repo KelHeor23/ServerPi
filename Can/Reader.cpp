@@ -89,25 +89,6 @@ void Reader::runCanHandler()
             }
 
             messages.push(frame);
-
-            CanFrameHeader temp = CanFrameHeader::unpack(frame.can_id);
-
-            std::cout << "priority: " << temp.priority << std::endl;
-            std::cout << "dataID: " << temp.dataID << std::endl;
-            std::cout << "frameType: " << temp.frameType << std::endl;
-            std::cout << "nodeID: " << temp.nodeID << std::endl;
-            /*
-            // Вывод информации о сообщении
-            std::cout << "ID: " << std::hex << std::setw(3) << std::setfill('0')
-                      << (frame.can_id & 0x1FFFFFFF) << "  Длина: " << std::dec
-                      << static_cast<int>(frame.can_dlc) << "  Данные: ";
-
-            // Вывод данных сообщения
-            for (int i = 0; i < frame.can_dlc; i++) {
-                std::cout << std::hex << std::setw(2) << std::setfill('0')
-                          << static_cast<int>(frame.data[i]) << " ";
-            }
-            std::cout << std::endl;*/
         }
     }
     catch (...) {
