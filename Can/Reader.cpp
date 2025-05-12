@@ -31,7 +31,7 @@ Reader::~Reader(){
 
 void Reader::run()
 {
-    std::thread read([=, this](){
+    std::thread read([this](){
         runCanHandler();
     });
 
@@ -61,6 +61,11 @@ int Reader::initSocket()
     memset(&addr, 0, sizeof(addr));
     addr.can_family = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
+
+    if (bind(canSocket, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        close(canSocket);
+        throw std::string{"Ошибка привязки сокета к интерфейсу!"};
+    }
 
     return 0;
 }
