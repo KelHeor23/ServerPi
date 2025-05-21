@@ -70,6 +70,33 @@ int Reader::initSocket()
         throw std::string{"Ошибка привязки сокета к интерфейсу!"};
     }
 
+    struct can_filter filters[3];
+
+    // Фильтр для ID 0x184e3620
+    filters[0].can_id = 0x184e3620 | CAN_EFF_FLAG;
+    filters[0].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
+
+    // Фильтр для ID 0x184e3720
+    filters[1].can_id = 0x184e3720 | CAN_EFF_FLAG;
+    filters[1].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
+
+    // Фильтр для ID 0x184e3820
+    filters[2].can_id = 0x184e3820 | CAN_EFF_FLAG;
+    filters[2].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
+
+    // Установка фильтров
+    if (setsockopt(
+            canSocket,
+            SOL_CAN_RAW,
+            CAN_RAW_FILTER,
+            &filters,
+            sizeof(filters)
+            ) == -1) {
+        perror("setsockopt");
+        close(canSocket);
+        return 1;
+    }
+
     return 0;
 }
 
