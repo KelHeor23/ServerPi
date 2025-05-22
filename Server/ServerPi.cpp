@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../Protocols/EngineSensors.h"
+
 
 ServerPi::ServerPi(boost::asio::io_service &io_service, unsigned short port)
     : acceptor_(io_service, tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), port)), socket_(io_service)
@@ -41,6 +43,9 @@ void ServerPi::start_sending()
 {
     auto self(shared_from_this());
     sendTestMessages();
+
+    output_message_ = getSensorData();
+    send_message();
 
     // Запускаем таймер для отправки сообщений каждые 0.5 секунды
     timer_.expires_after(std::chrono::milliseconds(500));

@@ -2,6 +2,7 @@
 #define READER_H
 
 #include <linux/can.h>
+#include <optional>
 #include <string>
 #include <unistd.h>
 #include <queue>
@@ -22,7 +23,8 @@ public:
     ~Reader();
 
     void run();
-    std::queue<can_frame> getMessages() const;
+    std::queue<can_frame> getMessages() const;    
+    std::optional<can_frame>  getCanFrame();
 
 private:
     Reader();

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <netinet/in.h>
+#include <optional>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -26,6 +27,17 @@ Reader::Reader() {
 std::queue<can_frame> Reader::getMessages() const
 {
     return messages;
+}
+
+std::optional<can_frame> Reader::getCanFrame()
+{
+    if (messages.empty()) {
+        return std::nullopt;
+    }
+
+    can_frame frame = messages.front();
+    messages.pop();
+    return frame;
 }
 
 Reader::~Reader(){
@@ -116,32 +128,6 @@ void Reader::runCanHandler()
             if (nbytes < sizeof(frame)) {
                 std::cerr << "Неполное CAN-сообщение!" << std::endl;
                 continue;
-            }
-
-            CanFrameHeader temp = CanFrameHeader::unpack(frame.can_id);
-
-            uint8_t node_id = ((frame.can_id & CAN_EFF_MASK)) & 0xFF;
-            uint16_t extracted_id = ((frame.can_id & CAN_EFF_MASK) >> 8) & 0xFFFF;
-
-            std::cout << "node_id: " << node_id << "frame: " << extracted_id;
-
-            switch(extracted_id){
-            case 20022: {
-                EscStatusInfo1 tempStatus1 = EscStatusInfo1::unpack(reinterpret_cast<const char*>(frame.data));
-                std::cout << " speed: " << (int)tempStatus1.speed << " recv_pwm: " << tempStatus1.recv_pwm / 10 << " comm_pwm: " << tempStatus1.comm_pwm / 10 << std::endl;
-                break;
-            }
-            case 20023: {
-                EscStatusInfo2 tempStatus2 = EscStatusInfo2::unpack(reinterpret_cast<const char*>(frame.data));
-                std::cout << " voltage: " << tempStatus2.voltage / 10 << " bus_current: " << tempStatus2.bus_current / 10 << " current: " << tempStatus2.current / 10 << std::endl;
-                break;
-            }
-            case 20024: {
-                EscStatusInfo3 tempStatus3 = EscStatusInfo3::unpack(reinterpret_cast<const char*>(frame.data));
-                std::cout << " cap: " << tempStatus3.cap_temp - 50 << " mcu_temp: " << (int)tempStatus3.mcu_temp - 50 << " motor_temp: " << (int)tempStatus3.motor_temp - 50 << " reserved: " << tempStatus3.reserved << std::endl;
-                break;
-            }
-            default: break;
             }
 
             messages.push(frame);

@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+#include "../Can/Reader.h"
+
 class EngineSensors
 {
 
@@ -22,8 +24,11 @@ public:
 
     std::string generateMsg(uint32_t canID);
 
+
 private:
     EngineSensorsData data;
 };
+
+std::string getSensorData();
 
 #endif // ENGINESENSORS_H
