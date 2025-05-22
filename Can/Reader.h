@@ -28,7 +28,6 @@ private:
     Reader();
     int initSocket();
     void runCanHandler();
-    void sendMsg();
 
     Reader(const Reader&) = delete;
     Reader& operator=(const Reader&) = delete;

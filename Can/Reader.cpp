@@ -29,7 +29,9 @@ std::queue<can_frame> Reader::getMessages() const
 }
 
 Reader::~Reader(){
-    close(canSocket);
+    if (canSocket != -1) {
+        close(canSocket);
+    }
 }
 
 void Reader::run()
@@ -70,19 +72,11 @@ int Reader::initSocket()
         throw std::string{"Ошибка привязки сокета к интерфейсу!"};
     }
 
-    struct can_filter filters[3];
-
-    // Фильтр для ID 0x184e3620
-    filters[0].can_id = 0x184e3620 | CAN_EFF_FLAG;
-    filters[0].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
-
-    // Фильтр для ID 0x184e3720
-    filters[1].can_id = 0x184e3720 | CAN_EFF_FLAG;
-    filters[1].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
-
-    // Фильтр для ID 0x184e3820
-    filters[2].can_id = 0x184e3820 | CAN_EFF_FLAG;
-    filters[2].can_mask = CAN_EFF_MASK | CAN_EFF_FLAG;
+    struct can_filter filters[3] = {
+        {0x184e3620 | CAN_EFF_FLAG, CAN_EFF_MASK | CAN_EFF_FLAG},
+        {0x184e3720 | CAN_EFF_FLAG, CAN_EFF_MASK | CAN_EFF_FLAG},
+        {0x184e3820 | CAN_EFF_FLAG, CAN_EFF_MASK | CAN_EFF_FLAG}
+    };
 
     // Установка фильтров
     if (setsockopt(
@@ -97,17 +91,24 @@ int Reader::initSocket()
         return 1;
     }
 
+    int recvbuf_size = 1024 * 1024; // 1 МБ
+    setsockopt(canSocket, SOL_SOCKET, SO_RCVBUF, &recvbuf_size, sizeof(recvbuf_size));
+
     return 0;
 }
 
 void Reader::runCanHandler()
-{    
+{
     try {
-        sendMsg();
+        //sendMsg();
         while (true) {
             // Чтение CAN-сообщения
             ssize_t nbytes = read(canSocket, &frame, sizeof(frame));
             if (nbytes < 0) {
+                if (errno == EINTR) {
+                    // Системный вызов прерван, продолжаем чтение
+                    continue;
+                }
                 std::cerr << "Ошибка чтения из сокета!" << std::endl;
                 break;
             }
@@ -117,38 +118,37 @@ void Reader::runCanHandler()
                 continue;
             }
 
+            CanFrameHeader temp = CanFrameHeader::unpack(frame.can_id);
+
+            uint8_t node_id = ((frame.can_id & CAN_EFF_MASK)) & 0xFF;
+            uint16_t extracted_id = ((frame.can_id & CAN_EFF_MASK) >> 8) & 0xFFFF;
+
+            std::cout << "node_id: " << node_id << "frame: " << extracted_id;
+
+            switch(extracted_id){
+            case 20022: {
+                EscStatusInfo1 tempStatus1 = EscStatusInfo1::unpack(reinterpret_cast<const char*>(frame.data));
+                std::cout << " speed: " << (int)tempStatus1.speed << " recv_pwm: " << tempStatus1.recv_pwm / 10 << " comm_pwm: " << tempStatus1.comm_pwm / 10 << std::endl;
+                break;
+            }
+            case 20023: {
+                EscStatusInfo2 tempStatus2 = EscStatusInfo2::unpack(reinterpret_cast<const char*>(frame.data));
+                std::cout << " voltage: " << tempStatus2.voltage / 10 << " bus_current: " << tempStatus2.bus_current / 10 << " current: " << tempStatus2.current / 10 << std::endl;
+                break;
+            }
+            case 20024: {
+                EscStatusInfo3 tempStatus3 = EscStatusInfo3::unpack(reinterpret_cast<const char*>(frame.data));
+                std::cout << " cap: " << tempStatus3.cap_temp - 50 << " mcu_temp: " << (int)tempStatus3.mcu_temp - 50 << " motor_temp: " << (int)tempStatus3.motor_temp - 50 << " reserved: " << tempStatus3.reserved << std::endl;
+                break;
+            }
+            default: break;
+            }
+
             messages.push(frame);
         }
     }
     catch (...) {
         throw std::string{"Чтение can было прервано"};
-    }
-}
-
-void Reader::sendMsg()
-{
-    CanRequestMsg request;
-    memset(&request, 0, sizeof(request));
-
-    request.opcode = 0x00;                   // Пример кода операции
-    request.status_msg_id = htons(0x4E36);    // Пример ID сообщения
-    request.upload_period_ms = htons(1000);    // Пример периода в мс
-
-    // Создание CAN-фрейма
-    struct can_frame frame;
-    memset(&frame, 0, sizeof(frame));
-
-    // Настройка фрейма (пример 11-битного идентификатора)
-    frame.can_id = 0x00E8A081;                     // CAN ID сообщения
-    frame.can_dlc = 8;                        // Всегда 8 байт для CAN
-
-    // Копирование данных во фрейм
-    memcpy(frame.data, &request, sizeof(request));
-
-    // Отправка данных
-    int bytes_sent = write(canSocket, &frame, sizeof(frame));
-    if (bytes_sent == -1) {
-        throw std::runtime_error("Ошибка отправки CAN-сообщения");
     }
 }
 }
