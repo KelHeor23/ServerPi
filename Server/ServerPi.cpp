@@ -42,7 +42,7 @@ void ServerPi::start_accept()
 void ServerPi::start_sending()
 {
     auto self(shared_from_this());
-    sendTestMessages();
+    //sendTestMessages();
 
     output_message_ = getSensorData();
     send_message();
