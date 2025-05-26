@@ -6,7 +6,7 @@
 
 
 ServerPi::ServerPi(boost::asio::io_service &io_service, unsigned short port)
-    : acceptor_(io_service, tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), port)), socket_(io_service)
+    : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)), socket_(io_service)
 {
     start_accept();
 }
