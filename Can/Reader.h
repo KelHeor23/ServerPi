@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <linux/can.h>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <unistd.h>
@@ -40,6 +41,7 @@ private:
     int canSocket = 0;
     struct can_frame frame;
     std::queue<can_frame> messages;
+    std::mutex mutex_;
 };
 }
 

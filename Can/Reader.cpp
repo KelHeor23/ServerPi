@@ -141,6 +141,7 @@ void Reader::runCanHandler()
 
 void Reader::sendMsg(uint32_t can_id, const uint8_t* msg_data, uint8_t msg_len)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (msg_len > 8) {
         throw std::invalid_argument("CAN message length cannot exceed 8 bytes");
     }

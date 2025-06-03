@@ -28,7 +28,7 @@ private:
     boost::asio::io_service io_service;
 
     tcp::acceptor acceptor_;
-    tcp::socket socket_;
+    std::shared_ptr<tcp::socket> socket_;
     boost::asio::steady_timer timer_{acceptor_.get_executor()};
     std::string output_message_;
 
