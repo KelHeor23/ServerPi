@@ -93,6 +93,8 @@ void ServerPi::sendTestMessages()
 
 void ServerPi::setMotorSpeed()
 {
+    static int i = 0;
+
     static uint16_t pwm = 9000;
 
     messageMotorSpeed[1] = (pwm >> 8) & 0xFF;  // Старший байт
@@ -100,6 +102,9 @@ void ServerPi::setMotorSpeed()
 
     Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
 
-    if (pwm < 13000)
+    if (pwm < 13000 && i == 10) {
+        i = 0;
         pwm += 500;
+    }
+    i++;
 }

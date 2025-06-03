@@ -37,8 +37,6 @@ std::string getSensorData()
     std::string msg(reinterpret_cast<char *> (&node_id), sizeof(node_id));
     msg += std::string(reinterpret_cast<char *> (&frame_id), sizeof(frame_id));
 
-    std::cout << "node_id: " << node_id << "frame: " << frame_id;
-
     switch(frame_id){
     case 20022: {
         Can::EscStatusInfo1 tempStatus1 = Can::EscStatusInfo1::unpack(reinterpret_cast<const char*>(frame->data));
