@@ -86,9 +86,20 @@ void ServerPi::sendTestMessages()
         usleep(1000);
     }*/
 
-    uint8_t message[4] = {0x20, 0x28, 0x23, 0xC0};
-    Can::Reader::Instance().sendMsg(0x004E2A01, message, 4);
-
+    setMotorSpeed();
     output_message_ = getSensorData();
     send_message();
+}
+
+void ServerPi::setMotorSpeed()
+{
+    static uint16_t pwm = 9000;
+
+    messageMotorSpeed[1] = (pwm >> 8) & 0xFF;  // Старший байт
+    messageMotorSpeed[2] = pwm & 0xFF;         // Младший байт
+
+    Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
+
+    if (pwm < 13000)
+        pwm += 500;
 }

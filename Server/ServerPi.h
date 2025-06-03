@@ -21,6 +21,9 @@ public:
     void sendTestMessages();
 
 private:
+    void setMotorSpeed();
+    uint8_t messageMotorSpeed[4] = {0x20, 0x28, 0x23, 0xC0};
+
     int port_g = 8000;
     boost::asio::io_service io_service;
 
