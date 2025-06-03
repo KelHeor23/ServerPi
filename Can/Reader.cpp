@@ -1,6 +1,5 @@
 #include "Reader.h"
 
-#include <iomanip>
 #include <iostream>
 #include <cstring>
 #include <netinet/in.h>
@@ -11,7 +10,6 @@
 #include <linux/can/raw.h>
 #include <thread>
 
-#include "Common.h"
 
 namespace Can {
 
@@ -31,6 +29,8 @@ std::queue<can_frame> Reader::getMessages() const
 
 std::optional<can_frame> Reader::getCanFrame()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (messages.empty()) {
         return std::nullopt;
     }
@@ -130,6 +130,7 @@ void Reader::runCanHandler()
                 continue;
             }
 
+            std::lock_guard<std::mutex> lock(mutex_);
             messages.push(frame);
         }
     }

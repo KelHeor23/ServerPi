@@ -41,7 +41,7 @@ private:
     int canSocket = 0;
     struct can_frame frame;
     std::queue<can_frame> messages;
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
 };
 }
 

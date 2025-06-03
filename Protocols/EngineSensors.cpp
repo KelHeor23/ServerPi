@@ -23,8 +23,6 @@ std::string EngineSensors::generateMsg(uint32_t canID)
 
 std::string getSensorData()
 {
-    Can::Reader::Instance().run();
-
     auto frame = Can::Reader::Instance().getCanFrame();
 
     if (!frame.has_value())
