@@ -73,7 +73,7 @@ void ServerPi::send_message()
 
 void ServerPi::sendTestMessages()
 {
-    for (int i = 0; i < 8; i++) {
+    /*for (int i = 0; i < 8; i++) {
         output_message_ = engineSensors.generateMsg(i);
         std::cout << output_message_ << std::endl;
         send_message();
@@ -84,7 +84,10 @@ void ServerPi::sendTestMessages()
         output_message_ = voltageRegulators.generateMsg(i);
         send_message();
         usleep(1000);
-    }
+    }*/
+
+    uint8_t message[4] = {0x20, 0x28, 0x23, 0xC0};
+    Can::Reader::Instance().sendMsg(0x004E2A01, message, 4);
 
     output_message_ = getSensorData();
     send_message();

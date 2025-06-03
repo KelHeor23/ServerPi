@@ -137,4 +137,26 @@ void Reader::runCanHandler()
         throw std::string{"Чтение can было прервано"};
     }
 }
+
+
+void Reader::sendMsg(uint32_t can_id, const uint8_t* msg_data, uint8_t msg_len)
+{
+    if (msg_len > 8) {
+        throw std::invalid_argument("CAN message length cannot exceed 8 bytes");
+    }
+
+    struct can_frame frame;
+    memset(&frame, 0, sizeof(frame));
+
+    frame.can_id = can_id;   // Принимаемый CAN ID, например 0x004E2A01
+    frame.can_dlc = msg_len; // Длина данных (максимум 8)
+
+    memcpy(frame.data, msg_data, msg_len); // Копируем переданное сообщение
+
+    int bytes_sent = write(canSocket, &frame, sizeof(frame));
+    if (bytes_sent == -1) {
+        throw std::runtime_error("Ошибка отправки CAN-сообщения");
+    }
+}
+
 }
