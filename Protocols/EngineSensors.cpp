@@ -31,7 +31,7 @@ std::string getSensorData()
         return "";
 
     uint32_t full_id = frame->can_id & CAN_EFF_MASK;
-    uint8_t node_id = full_id & 0xFF;
+    uint16_t node_id = full_id & 0xFF;
     uint16_t frame_id = (full_id >> 8) & 0xFFFF;
 
     std::string msg(reinterpret_cast<char *> (&node_id), sizeof(node_id));

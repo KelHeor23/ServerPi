@@ -42,10 +42,10 @@ void ServerPi::start_accept()
 void ServerPi::start_sending()
 {
     auto self(shared_from_this());
-    //sendTestMessages();
+    sendTestMessages();
 
-    output_message_ = getSensorData();
-    send_message();
+    //output_message_ = getSensorData();
+    //send_message();
 
     // Запускаем таймер для отправки сообщений каждые 0.5 секунды
     timer_.expires_after(std::chrono::milliseconds(500));
@@ -85,4 +85,7 @@ void ServerPi::sendTestMessages()
         send_message();
         usleep(1000);
     }
+
+    output_message_ = getSensorData();
+    send_message();
 }
