@@ -67,10 +67,18 @@ void ServerPi::send_message()
 
 void ServerPi::sendTestMessages()
 {
-    setMotorSpeed();
-    std::string msg = getSensorData(); // локальная копия
+    std::string msg = voltageRegulators.generateMsg(0);
+
 
     auto self(shared_from_this());
+    boost::asio::async_write(*socket_,
+                             boost::asio::buffer(msg),
+                             [self](auto, auto){} // продлеваем время жизни
+                             );
+
+    setMotorSpeed();
+    msg = getSensorData(); // локальная копия
+
     boost::asio::async_write(*socket_,
                              boost::asio::buffer(msg),
                              [self](auto, auto){} // продлеваем время жизни
@@ -88,7 +96,7 @@ void ServerPi::setMotorSpeed()
 
     Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
 
-    if (pwm < 19000 && i == 10) {
+    if (pwm < 19500 && i == 10) {
         i = 0;
         pwm += 500;
     }
