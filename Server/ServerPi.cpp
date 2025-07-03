@@ -42,7 +42,7 @@ void ServerPi::start_sending()
     if (!socket_->is_open()) return;
 
     auto self(shared_from_this());
-    timer_.expires_after(std::chrono::milliseconds(500));
+    timer_.expires_after(std::chrono::milliseconds(50));
     timer_.async_wait([this, self](boost::system::error_code ec) {
         if (ec || !socket_->is_open()) return;
 
