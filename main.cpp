@@ -7,6 +7,7 @@ int main()
 {
     try {
         Can::Reader::Instance().run();
+        //Can::Reader::Instance().subscribeESCData();
 
         boost::asio::io_service io_service;
         auto server = std::make_shared<ServerPi>(io_service, 8002);

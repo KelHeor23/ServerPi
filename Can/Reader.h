@@ -29,7 +29,7 @@ public:
     std::optional<can_frame>  getCanFrame();
     void sendMsg(uint32_t can_id, const uint8_t* msg_data, uint8_t msg_len);
     void sendMotorsPwm();
-
+    void subscribeESCData();
     void setMotorPwm(uint8_t num, uint16_t pwm);
 
 private:
