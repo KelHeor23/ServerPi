@@ -175,11 +175,11 @@ void Reader::sendMotorsPwm()
         {
             uint16_t pwm = motorsPwm[i];
             std::cout << "motor: " << i << " pwm: " << pwm << std::endl;
-            messageMotorSpeed[0] = i;
+            messageMotorSpeed[0] = i + 32;
             messageMotorSpeed[1] = pwm & 0xFF;         // Младший байт
             messageMotorSpeed[2] = (pwm >> 8) & 0xFF;  // Старший байт
 
-            sendMsg(0x004E2A01, messageMotorSpeed, 4);
+            Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
@@ -191,14 +191,8 @@ void Reader::setMotorPwm(uint8_t num, uint16_t pwm)
 }
 
 void Reader::subscribeESCData(){
-    uint8_t dataE1[] = {0x02, 0x36, 0x4E, 0xE8, 0x03, 0xC0};
-    sendMsg(0x00E8A081, dataE1, 6);
-
-    uint8_t dataE2[] = {0x02, 0x37, 0x4E, 0xE8, 0x03, 0xC0};
-    sendMsg(0x00E8A081, dataE2, 6);
-
-    uint8_t dataE3[] = {0x02, 0x38, 0x4E, 0xE8, 0x03, 0xC0};
-    sendMsg(0x00E8A081, dataE3, 6);
+    uint8_t data[] = {0x02, 0x36, 0x4E, 0xE8, 0x03, 0xC0};
+    sendMsg(0x00E8A081, messageMotorSpeed, 6);
 }
 
 
