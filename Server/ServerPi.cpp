@@ -94,7 +94,6 @@ void ServerPi::process_received_data(size_t length) {
         }
 
         Can::Reader::Instance().setMotorPwm(msg.motorNum, msg.pwm);
-        std::cout << "motor: " << msg.motorNum << " pwm: " << msg.pwm << std::endl;
     }
 }
 
@@ -119,6 +118,12 @@ void ServerPi::sendTestMessages()
 
 
     auto self(shared_from_this());
+    boost::asio::async_write(*socket_,
+                             boost::asio::buffer(msg),
+                             [self](auto, auto){} // продлеваем время жизни
+                             );
+
+    msg = getSensorData(); // локальная копия
     boost::asio::async_write(*socket_,
                              boost::asio::buffer(msg),
                              [self](auto, auto){} // продлеваем время жизни

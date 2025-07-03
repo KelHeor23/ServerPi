@@ -174,7 +174,6 @@ void Reader::sendMotorsPwm()
         for (int i = 0; i < motorsPwm.size(); i++)
         {
             uint16_t pwm = motorsPwm[i];
-            std::cout << "motor: " << i << " pwm: " << pwm << std::endl;
             messageMotorSpeed[0] = i + 32;
             messageMotorSpeed[1] = pwm & 0xFF;         // Младший байт
             messageMotorSpeed[2] = (pwm >> 8) & 0xFF;  // Старший байт
