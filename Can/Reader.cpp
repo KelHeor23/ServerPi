@@ -28,6 +28,12 @@ std::queue<can_frame> Reader::getMessages() const
     return messages;
 }
 
+void Reader::messagesClean()
+{
+    std::queue<can_frame> empty;
+    messages.swap(empty);  // Очистка очереди
+}
+
 std::optional<can_frame> Reader::getCanFrame()
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -38,6 +44,7 @@ std::optional<can_frame> Reader::getCanFrame()
 
     can_frame frame = messages.front();
     messages.pop();
+
     return frame;
 }
 

@@ -23,6 +23,7 @@ void ServerPi::start_accept()
 
     acceptor_.async_accept(*new_socket, [this, new_socket](auto ec) {
         if (!ec) {
+            Can::Reader::Instance().messagesClean();
             // Закрываем предыдущее подключение
             if (socket_ && socket_->is_open()) {
                 boost::system::error_code ignore;

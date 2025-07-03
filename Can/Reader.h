@@ -25,7 +25,8 @@ public:
     ~Reader();
 
     void run();
-    std::queue<can_frame> getMessages() const;    
+    std::queue<can_frame> getMessages() const;
+    void messagesClean();
     std::optional<can_frame>  getCanFrame();
     void sendMsg(uint32_t can_id, const uint8_t* msg_data, uint8_t msg_len);
     void sendMotorsPwm();
