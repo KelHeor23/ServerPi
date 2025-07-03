@@ -48,7 +48,7 @@ private:
 
     std::vector<uint16_t> motorsPwm;
 
-    int cntMotors = 8;
+    int cntMotors = 2;
     uint8_t messageMotorSpeed[4] = {0x20, 0x28, 0x23, 0xC0};
 };
 }

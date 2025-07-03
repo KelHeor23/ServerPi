@@ -200,6 +200,7 @@ void Reader::sendMotorsPwm()
             messageMotorSpeed[2] = (pwm >> 8) & 0xFF;  // Старший байт
 
             Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
