@@ -31,6 +31,7 @@ void ServerPi::start_accept()
             }
             socket_ = new_socket;
             start_sending();
+            start_receiving();
         }
         start_accept(); // Принимаем следующего клиента
     });
@@ -48,6 +49,53 @@ void ServerPi::start_sending()
         sendTestMessages();
         start_sending(); // Рекурсивный вызов только после завершения
     });
+}
+
+void ServerPi::start_receiving() {
+    if (!socket_ || !socket_->is_open()) return;
+
+    auto self(shared_from_this());
+    socket_->async_read_some(boost::asio::buffer(buffer_),
+                             [this, self](boost::system::error_code ec, size_t length) {
+                                 if (!ec) {
+                                     process_received_data(length);
+                                     start_receiving();  // Цикл приема сообщений
+                                 } else {
+                                     // Обработка ошибок подключения
+                                     if (ec != boost::asio::error::operation_aborted) {
+                                         std::cerr << "Receive error: " << ec.message() << std::endl;
+                                         if (socket_ && socket_->is_open()) {
+                                             boost::system::error_code ignore;
+                                             socket_->close(ignore);
+                                         }
+                                         timer_.cancel();
+                                     }
+                                 }
+                             });
+}
+
+void ServerPi::process_received_data(size_t length) {
+    // Проверка минимального размера
+    if (length < sizeof(Msg::MotorControlMsg)) {
+        return; // Пустой вектор
+    }
+
+    size_t offset = 0;
+    while (offset <= length - sizeof(Msg::MotorControlMsg)) {
+        Msg::MotorControlMsg msg;
+        // Копируем данные из буфера
+        std::memcpy(&msg, buffer_.data() + offset, sizeof(Msg::MotorControlMsg));
+        offset += sizeof(Msg::MotorControlMsg);
+
+        // Проверка команды
+        if (msg.comand != Msg::Command::MOTOR_CONTROL) {
+            // Пропускаем некорректное сообщение или прерываем обработку
+            continue;
+        }
+
+        Can::Reader::Instance().setMotorPwm(msg.motorNum, msg.pwm);
+        std::cout << "motor: " << msg.motorNum << " pwm: " << msg.pwm << std::endl;
+    }
 }
 
 void ServerPi::send_message()
@@ -75,30 +123,4 @@ void ServerPi::sendTestMessages()
                              boost::asio::buffer(msg),
                              [self](auto, auto){} // продлеваем время жизни
                              );
-
-    setMotorSpeed();
-    msg = getSensorData(); // локальная копия
-
-    boost::asio::async_write(*socket_,
-                             boost::asio::buffer(msg),
-                             [self](auto, auto){} // продлеваем время жизни
-                             );
-}
-
-void ServerPi::setMotorSpeed()
-{
-    static int i = 0;
-
-    static uint16_t pwm = 9000;
-
-    messageMotorSpeed[1] = pwm & 0xFF;         // Младший байт
-    messageMotorSpeed[2] = (pwm >> 8) & 0xFF;  // Старший байт
-
-    Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
-
-    if (pwm < 19500 && i == 10) {
-        i = 0;
-        pwm += 500;
-    }
-    i++;
 }

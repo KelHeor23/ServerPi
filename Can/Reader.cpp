@@ -16,6 +16,7 @@ namespace Can {
 Reader::Reader() {
     try {
         initSocket();
+        motorsPwm.assign(cntMotors, 9000);
     } catch (const std::string& msg) {
         throw msg;
         return;
@@ -51,8 +52,14 @@ void Reader::run()
     std::thread read([this](){
         runCanHandler();
     });
-
     read.detach();
+
+    if (true) { // включить полноценное тестовое управление
+        std::thread send([this](){
+            sendMotorsPwm();
+        });
+        send.detach();
+    }
 }
 
 int Reader::initSocket()
@@ -160,5 +167,29 @@ void Reader::sendMsg(uint32_t can_id, const uint8_t* msg_data, uint8_t msg_len)
         throw std::runtime_error("Ошибка отправки CAN-сообщения");
     }
 }
+
+void Reader::sendMotorsPwm()
+{
+    while(true) {
+        for (int i = 0; i < motorsPwm.size(); i++)
+        {
+            uint16_t pwm = motorsPwm[i];
+            std::cout << "motor: " << i << " pwm: " << pwm << std::endl;
+            messageMotorSpeed[0] = i;
+            messageMotorSpeed[1] = pwm & 0xFF;         // Младший байт
+            messageMotorSpeed[2] = (pwm >> 8) & 0xFF;  // Старший байт
+
+            Can::Reader::Instance().sendMsg(0x004E2A01, messageMotorSpeed, 4);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+}
+
+void Reader::setMotorPwm(uint8_t num, uint16_t pwm)
+{
+    motorsPwm[num] = pwm * 10;
+}
+
+
 
 }

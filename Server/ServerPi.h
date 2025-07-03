@@ -8,6 +8,21 @@
 
 using boost::asio::ip::tcp;
 
+namespace Msg {
+
+enum Command{
+    MOTOR_CONTROL = 0x01
+};
+
+#pragma pack(push, 1) // Отключаем выравнивание
+struct MotorControlMsg {
+    Command     comand;
+    uint8_t     motorNum;
+    uint16_t    pwm;
+};
+#pragma pack(pop) // Восстанавливаем предыдущее значение выравнивания
+};
+
 class ServerPi : public std::enable_shared_from_this<ServerPi>
 {
 public:
@@ -16,12 +31,13 @@ public:
     void run();
     void start_accept();
     void start_sending();
+    void start_receiving();
+    void process_received_data(size_t length);
     void send_message();
 
     void sendTestMessages();
 
 private:
-    void setMotorSpeed();
     uint8_t messageMotorSpeed[4] = {0x20, 0x28, 0x23, 0xC0};
 
     int port_g = 8000;
@@ -31,9 +47,11 @@ private:
     std::shared_ptr<tcp::socket> socket_;
     boost::asio::steady_timer timer_{acceptor_.get_executor()};
     std::string output_message_;
+    std::array<char, 1024> buffer_;
 
     EngineSensors engineSensors;
     VoltageRegulators voltageRegulators;
 };
+
 
 #endif // SERVERPI_H
